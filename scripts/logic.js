@@ -59,32 +59,89 @@ function getQuestion() {
 
 function questionClick() {
   // Check if user guessed wrong
-  // Penalize time
-  // Display new time on page
+  if (this.value !== questionaire[currentQuestionIndex].answer) {
+    // Penalize time
+    time -= 20;
+
+    if (time < 0) {
+      time = 0;
+    }
+    // Display new time on page
+    timerEl.textContent = time;
+    feedbackEl.textContent = "Wrong!";
+    feedbackEl.style.color = "red";
+    feedbackEl.style.fontSize = "400%";
+  } else {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+    feedbackEl.style.fontSize = "400%";
+  }
+
   // Flash right/wrong feedback
+  feedbackEl.setAttribute("class", "feedback");
+  setTimeout(function() {
+    feedbackEl.setAttribute("class", "feedback hide");
+  }, 1000);
+
   // Next question
+  currentQuestionIndex++;
+
   // Time checker
+  if (currentQuestionIndex === questionaire.length) {
+    quizEnd();
+  } else {
+    getQuestion();
+  }
 }
 
 function quizEnd() {
   // Stop timer
+  clearInterval(timerId);
+
   // Show end screen
+  let endScreenEl = document.getElementById("end-screen");
+  endScreenEl.removeAttribute("class");
+
   // Show final score
+  let finalScoreEl = document.getElementById("final-score");
+  finalScoreEl.textContent = time;
+
   // Hide questions section
+  questionsEl.setAttribute("class", "hide");
 }
 
 function clockTick() {
-  // Update time
-  // Check if user run out of time
+      // Update time
+      time--;
+      timerEl.textContent = time;
+    
+      // Check if user ran out of time
+      if (time <= 0) {
+        quizEnd();
+      }
 }
 
 function saveHighscore() {
   // Get value of input box
   let initials = initialsEl.value.trim();
-  // Get saved scores from localstorage, or if not any, set to empty array
-  // Format new score object for current user
-  // Save to localstorage
-  // Redirect to next page
+  if (initials !== "") {
+    // Get saved scores from localstorage, or if not any, set to empty array
+    let highscores =
+      JSON.parse(window.localStorage.getItem("highscores")) || [];
+
+    // Format new score object for current user
+    let newScore = {
+      score: time,
+      initials: initials
+    };
+
+    // Save to localstorage
+    highscores.push(newScore);
+    window.localStorage.setItem("highscores", JSON.stringify(highscores));
+
+    // Redirect to next page
+    window.location.href = "highscores.html";
+  }
 }
 
 function checkForEnter(event) {
